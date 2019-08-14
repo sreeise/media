@@ -161,6 +161,8 @@ impl Player for DummyPlayer {
     fn render_use_gl(&self) -> bool {
         false
     }
+    fn set_audio_track_enabled(&self, _: i32,  _: bool) -> Result<(), PlayerError> { Ok(()) }
+    fn set_video_track_enabled(&self, _: i32,  _: bool) -> Result<(), PlayerError> { Ok(()) }
 }
 
 impl WebRtcBackend for DummyBackend {

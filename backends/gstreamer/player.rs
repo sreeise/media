@@ -57,14 +57,14 @@ fn metadata_from_media_info(media_info: &gst_player::PlayerMediaInfo) -> Result<
                     .get_codec()
                     .unwrap_or_else(|| glib::GString::from(""))
                     .to_string();
-                audio_tracks.push(codec);
+                audio_tracks.push((codec, stream_info.get_index()));
             }
             "video" => {
                 let codec = stream_info
                     .get_codec()
                     .unwrap_or_else(|| glib::GString::from(""))
                     .to_string();
-                video_tracks.push(codec);
+                video_tracks.push((codec, stream_info.get_index()));
             }
             _ => {}
         }
@@ -284,6 +284,18 @@ impl PlayerInner {
             }
         }
         Err(PlayerError::SetStreamFailed)
+    }
+
+    fn set_audio_track_enabled(&mut self, stream_index: i32, enabled: bool) -> Result<(), PlayerError> {
+        self.player.set_audio_track(stream_index).map_err(|_| PlayerError::SetTrackFailed)?;
+        self.player.set_audio_track_enabled(enabled);
+        Ok(())
+    }
+
+    fn set_video_track_enabled(&mut self, stream_index: i32,  enabled: bool) -> Result<(), PlayerError> {
+        self.player.set_video_track(stream_index).map_err(|_| PlayerError::SetTrackFailed)?;
+        self.player.set_video_track_enabled(enabled);
+        Ok(())
     }
 }
 
@@ -784,6 +796,18 @@ impl Player for GStreamerPlayer {
         let inner = self.inner.borrow();
         let mut inner = inner.as_ref().unwrap().lock().unwrap();
         inner.set_stream(stream, only_stream)
+    }
+
+    fn set_audio_track_enabled(&self, stream_index: i32, enabled: bool) -> Result<(), PlayerError> {
+        let inner = self.inner.borrow();
+        let mut inner = inner.as_ref().unwrap().lock().unwrap();
+        inner.set_audio_track_enabled(stream_index, enabled)
+    }
+
+    fn set_video_track_enabled(&self, stream_index: i32,  enabled: bool) -> Result<(), PlayerError> {
+        let inner = self.inner.borrow();
+        let mut inner = inner.as_ref().unwrap().lock().unwrap();
+        inner.set_video_track_enabled(stream_index, enabled)
     }
 }
 
